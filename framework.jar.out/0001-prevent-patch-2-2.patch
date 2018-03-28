@@ -1,0 +1,175 @@
+From 62dcfd58d35c8b92edd7ec0997d55ff5a9a95bdf Mon Sep 17 00:00:00 2001
+From: wzv5 <wzv5@msn.com>
+Date: Wed, 28 Mar 2018 20:05:58 +0800
+Subject: [PATCH] prevent patch [2/2]
+
+---
+ .../app/INotificationManager$Stub$Proxy.smali      | 64 ++++++++++++++++++++++
+ smali/android/app/INotificationManager$Stub.smali  | 42 ++++++++++++++
+ smali/android/app/INotificationManager.smali       |  8 +++
+ 3 files changed, 114 insertions(+)
+
+diff --git a/smali/android/app/INotificationManager$Stub$Proxy.smali b/smali/android/app/INotificationManager$Stub$Proxy.smali
+index 26a4736..7527da0 100644
+--- a/smali/android/app/INotificationManager$Stub$Proxy.smali
++++ b/smali/android/app/INotificationManager$Stub$Proxy.smali
+@@ -3457,6 +3457,70 @@
+     throw v3
+ .end method
+ 
++.method public getPriority(Ljava/lang/String;I)I
++    .locals 6
++    .param p1, "pkg"    # Ljava/lang/String;
++    .param p2, "uid"    # I
++    .annotation system Ldalvik/annotation/Throws;
++        value = {
++            Landroid/os/RemoteException;
++        }
++    .end annotation
++
++    .prologue
++    invoke-static {}, Landroid/os/Parcel;->obtain()Landroid/os/Parcel;
++
++    move-result-object v0
++
++    .local v0, "_data":Landroid/os/Parcel;
++    invoke-static {}, Landroid/os/Parcel;->obtain()Landroid/os/Parcel;
++
++    move-result-object v1
++
++    .local v1, "_reply":Landroid/os/Parcel;
++    :try_start_0
++    const-string/jumbo v3, "android.app.INotificationManager"
++
++    invoke-virtual {v0, v3}, Landroid/os/Parcel;->writeInterfaceToken(Ljava/lang/String;)V
++
++    invoke-virtual {v0, p1}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
++
++    invoke-virtual {v0, p2}, Landroid/os/Parcel;->writeInt(I)V
++
++    iget-object v3, p0, Landroid/app/INotificationManager$Stub$Proxy;->mRemote:Landroid/os/IBinder;
++
++    const/16 v4, 0x5a
++
++    const/4 v5, 0x0
++
++    invoke-interface {v3, v4, v0, v1, v5}, Landroid/os/IBinder;->transact(ILandroid/os/Parcel;Landroid/os/Parcel;I)Z
++
++    invoke-virtual {v1}, Landroid/os/Parcel;->readException()V
++
++    invoke-virtual {v1}, Landroid/os/Parcel;->readInt()I
++    :try_end_0
++    .catchall {:try_start_0 .. :try_end_0} :catchall_0
++
++    move-result v2
++
++    .local v2, "_result":I
++    invoke-virtual {v1}, Landroid/os/Parcel;->recycle()V
++
++    invoke-virtual {v0}, Landroid/os/Parcel;->recycle()V
++
++    return v2
++
++    .end local v2    # "_result":I
++    :catchall_0
++    move-exception v3
++
++    invoke-virtual {v1}, Landroid/os/Parcel;->recycle()V
++
++    invoke-virtual {v0}, Landroid/os/Parcel;->recycle()V
++
++    throw v3
++.end method
++
+ .method public getRuleInstanceCount(Landroid/content/ComponentName;)I
+     .locals 6
+     .param p1, "owner"    # Landroid/content/ComponentName;
+diff --git a/smali/android/app/INotificationManager$Stub.smali b/smali/android/app/INotificationManager$Stub.smali
+index 27b7c5c..8387ac3 100644
+--- a/smali/android/app/INotificationManager$Stub.smali
++++ b/smali/android/app/INotificationManager$Stub.smali
+@@ -116,6 +116,8 @@
+ 
+ .field static final TRANSACTION_getPackageImportance:I = 0xc
+ 
++.field static final TRANSACTION_getPriority:I = 0x5a
++
+ .field static final TRANSACTION_getRuleInstanceCount:I = 0x55
+ 
+ .field static final TRANSACTION_getSnoozedNotificationsFromListener:I = 0x2b
+@@ -4701,6 +4703,45 @@
+     .restart local v17    # "_arg0":Z
+     goto :goto_46
+ 
++    .end local v17    # "_arg0":Z
++    :sswitch_5a
++    const-string/jumbo v4, "android.app.INotificationManager"
++
++    move-object/from16 v0, p2
++
++    invoke-virtual {v0, v4}, Landroid/os/Parcel;->enforceInterface(Ljava/lang/String;)V
++
++    invoke-virtual/range {p2 .. p2}, Landroid/os/Parcel;->readString()Ljava/lang/String;
++
++    move-result-object v5
++
++    .restart local v5    # "_arg0":Ljava/lang/String;
++    invoke-virtual/range {p2 .. p2}, Landroid/os/Parcel;->readInt()I
++
++    move-result v19
++
++    .restart local v19    # "_arg1":I
++    move-object/from16 v0, p0
++
++    move/from16 v1, v19
++
++    invoke-virtual {v0, v5, v1}, Landroid/app/INotificationManager$Stub;->getPriority(Ljava/lang/String;I)I
++
++    move-result v41
++
++    .restart local v41    # "_result":I
++    invoke-virtual/range {p3 .. p3}, Landroid/os/Parcel;->writeNoException()V
++
++    move-object/from16 v0, p3
++
++    move/from16 v1, v41
++
++    invoke-virtual {v0, v1}, Landroid/os/Parcel;->writeInt(I)V
++
++    const/4 v4, 0x1
++
++    return v4
++
+     :sswitch_data_0
+     .sparse-switch
+         0x1 -> :sswitch_1
+@@ -4792,6 +4833,7 @@
+         0x57 -> :sswitch_57
+         0x58 -> :sswitch_58
+         0x59 -> :sswitch_59
++        0x5a -> :sswitch_5a
+         0x5f4e5446 -> :sswitch_0
+     .end sparse-switch
+ .end method
+diff --git a/smali/android/app/INotificationManager.smali b/smali/android/app/INotificationManager.smali
+index 47b8553..b293d95 100644
+--- a/smali/android/app/INotificationManager.smali
++++ b/smali/android/app/INotificationManager.smali
+@@ -406,6 +406,14 @@
+     .end annotation
+ .end method
+ 
++.method public abstract getPriority(Ljava/lang/String;I)I
++    .annotation system Ldalvik/annotation/Throws;
++        value = {
++            Landroid/os/RemoteException;
++        }
++    .end annotation
++.end method
++
+ .method public abstract getRuleInstanceCount(Landroid/content/ComponentName;)I
+     .annotation system Ldalvik/annotation/Throws;
+         value = {
+-- 
+2.16.3.windows.1
+
