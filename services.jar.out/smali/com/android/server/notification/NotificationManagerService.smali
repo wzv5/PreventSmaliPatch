@@ -13031,7 +13031,7 @@
     goto :goto_1
 .end method
 
-.method synthetic lambda$-com_android_server_notification_NotificationManagerService_190836(Lcom/android/server/notification/NotificationRecord;Landroid/os/VibrationEffect;)V
+.method synthetic lambda$-com_android_server_notification_NotificationManagerService_191018(Lcom/android/server/notification/NotificationRecord;Landroid/os/VibrationEffect;)V
     .locals 6
     .param p1, "record"    # Lcom/android/server/notification/NotificationRecord;
     .param p2, "effect"    # Landroid/os/VibrationEffect;

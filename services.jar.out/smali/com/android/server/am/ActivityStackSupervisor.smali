@@ -1111,6 +1111,273 @@
     return v0
 .end method
 
+.method private cleanUpRemovedTaskLocked$Pr(Lcom/android/server/am/TaskRecord;ZZ)V
+    .locals 14
+    .param p1, "tr"    # Lcom/android/server/am/TaskRecord;
+    .param p2, "killProcess"    # Z
+    .param p3, "removeFromRecents"    # Z
+
+    .prologue
+    if-eqz p3, :cond_0
+
+    iget-object v11, p0, Lcom/android/server/am/ActivityStackSupervisor;->mRecentTasks:Lcom/android/server/am/RecentTasks;
+
+    invoke-virtual {v11, p1}, Lcom/android/server/am/RecentTasks;->remove(Ljava/lang/Object;)Z
+
+    invoke-virtual {p1}, Lcom/android/server/am/TaskRecord;->removedFromRecents()V
+
+    :cond_0
+    invoke-virtual {p1}, Lcom/android/server/am/TaskRecord;->getBaseIntent()Landroid/content/Intent;
+
+    move-result-object v11
+
+    invoke-virtual {v11}, Landroid/content/Intent;->getComponent()Landroid/content/ComponentName;
+
+    move-result-object v0
+
+    .local v0, "component":Landroid/content/ComponentName;
+    if-nez v0, :cond_1
+
+    sget-object v11, Lcom/android/server/am/ActivityStackSupervisor;->TAG:Ljava/lang/String;
+
+    new-instance v12, Ljava/lang/StringBuilder;
+
+    invoke-direct {v12}, Ljava/lang/StringBuilder;-><init>()V
+
+    const-string/jumbo v13, "No component for base intent of task: "
+
+    invoke-virtual {v12, v13}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v12
+
+    invoke-virtual {v12, p1}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+
+    move-result-object v12
+
+    invoke-virtual {v12}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v12
+
+    invoke-static {v11, v12}, Landroid/util/Slog;->w(Ljava/lang/String;Ljava/lang/String;)I
+
+    return-void
+
+    :cond_1
+    iget-object v11, p0, Lcom/android/server/am/ActivityStackSupervisor;->mService:Lcom/android/server/am/ActivityManagerService;
+
+    iget-object v11, v11, Lcom/android/server/am/ActivityManagerService;->mServices:Lcom/android/server/am/ActiveServices;
+
+    new-instance v12, Landroid/content/Intent;
+
+    invoke-virtual {p1}, Lcom/android/server/am/TaskRecord;->getBaseIntent()Landroid/content/Intent;
+
+    move-result-object v13
+
+    invoke-direct {v12, v13}, Landroid/content/Intent;-><init>(Landroid/content/Intent;)V
+
+    invoke-virtual {v11, p1, v0, v12}, Lcom/android/server/am/ActiveServices;->cleanUpRemovedTaskLocked(Lcom/android/server/am/TaskRecord;Landroid/content/ComponentName;Landroid/content/Intent;)V
+
+    if-nez p2, :cond_2
+
+    return-void
+
+    :cond_2
+    invoke-virtual {v0}, Landroid/content/ComponentName;->getPackageName()Ljava/lang/String;
+
+    move-result-object v5
+
+    .local v5, "pkg":Ljava/lang/String;
+    new-instance v9, Ljava/util/ArrayList;
+
+    invoke-direct {v9}, Ljava/util/ArrayList;-><init>()V
+
+    .local v9, "procsToKill":Ljava/util/ArrayList;, "Ljava/util/ArrayList<Lcom/android/server/am/ProcessRecord;>;"
+    iget-object v11, p0, Lcom/android/server/am/ActivityStackSupervisor;->mService:Lcom/android/server/am/ActivityManagerService;
+
+    iget-object v11, v11, Lcom/android/server/am/ActivityManagerService;->mProcessNames:Lcom/android/internal/app/ProcessMap;
+
+    invoke-virtual {v11}, Lcom/android/internal/app/ProcessMap;->getMap()Landroid/util/ArrayMap;
+
+    move-result-object v6
+
+    .local v6, "pmap":Landroid/util/ArrayMap;, "Landroid/util/ArrayMap<Ljava/lang/String;Landroid/util/SparseArray<Lcom/android/server/am/ProcessRecord;>;>;"
+    const/4 v1, 0x0
+
+    .local v1, "i":I
+    :goto_0
+    invoke-virtual {v6}, Landroid/util/ArrayMap;->size()I
+
+    move-result v11
+
+    if-ge v1, v11, :cond_9
+
+    invoke-virtual {v6, v1}, Landroid/util/ArrayMap;->valueAt(I)Ljava/lang/Object;
+
+    move-result-object v10
+
+    check-cast v10, Landroid/util/SparseArray;
+
+    .local v10, "uids":Landroid/util/SparseArray;, "Landroid/util/SparseArray<Lcom/android/server/am/ProcessRecord;>;"
+    const/4 v2, 0x0
+
+    .local v2, "j":I
+    :goto_1
+    invoke-virtual {v10}, Landroid/util/SparseArray;->size()I
+
+    move-result v11
+
+    if-ge v2, v11, :cond_8
+
+    invoke-virtual {v10, v2}, Landroid/util/SparseArray;->valueAt(I)Ljava/lang/Object;
+
+    move-result-object v8
+
+    check-cast v8, Lcom/android/server/am/ProcessRecord;
+
+    .local v8, "proc":Lcom/android/server/am/ProcessRecord;
+    iget v11, v8, Lcom/android/server/am/ProcessRecord;->userId:I
+
+    iget v12, p1, Lcom/android/server/am/TaskRecord;->userId:I
+
+    if-eq v11, v12, :cond_4
+
+    :cond_3
+    :goto_2
+    add-int/lit8 v2, v2, 0x1
+
+    goto :goto_1
+
+    :cond_4
+    iget-object v11, p0, Lcom/android/server/am/ActivityStackSupervisor;->mService:Lcom/android/server/am/ActivityManagerService;
+
+    iget-object v11, v11, Lcom/android/server/am/ActivityManagerService;->mHomeProcess:Lcom/android/server/am/ProcessRecord;
+
+    if-eq v8, v11, :cond_3
+
+    iget-object v11, v8, Lcom/android/server/am/ProcessRecord;->pkgList:Landroid/util/ArrayMap;
+
+    invoke-virtual {v11, v5}, Landroid/util/ArrayMap;->containsKey(Ljava/lang/Object;)Z
+
+    move-result v11
+
+    if-eqz v11, :cond_3
+
+    const/4 v3, 0x0
+
+    .local v3, "k":I
+    :goto_3
+    iget-object v11, v8, Lcom/android/server/am/ProcessRecord;->activities:Ljava/util/ArrayList;
+
+    invoke-virtual {v11}, Ljava/util/ArrayList;->size()I
+
+    move-result v11
+
+    if-ge v3, v11, :cond_6
+
+    iget-object v11, v8, Lcom/android/server/am/ProcessRecord;->activities:Ljava/util/ArrayList;
+
+    invoke-virtual {v11, v3}, Ljava/util/ArrayList;->get(I)Ljava/lang/Object;
+
+    move-result-object v11
+
+    check-cast v11, Lcom/android/server/am/ActivityRecord;
+
+    invoke-virtual {v11}, Lcom/android/server/am/ActivityRecord;->getTask()Lcom/android/server/am/TaskRecord;
+
+    move-result-object v4
+
+    .local v4, "otherTask":Lcom/android/server/am/TaskRecord;
+    iget v11, p1, Lcom/android/server/am/TaskRecord;->taskId:I
+
+    iget v12, v4, Lcom/android/server/am/TaskRecord;->taskId:I
+
+    if-eq v11, v12, :cond_5
+
+    iget-boolean v11, v4, Lcom/android/server/am/TaskRecord;->inRecents:Z
+
+    if-eqz v11, :cond_5
+
+    return-void
+
+    :cond_5
+    add-int/lit8 v3, v3, 0x1
+
+    goto :goto_3
+
+    .end local v4    # "otherTask":Lcom/android/server/am/TaskRecord;
+    :cond_6
+    iget-boolean v11, v8, Lcom/android/server/am/ProcessRecord;->foregroundServices:Z
+
+    if-eqz v11, :cond_7
+
+    return-void
+
+    :cond_7
+    invoke-virtual {v9, v8}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
+
+    goto :goto_2
+
+    .end local v3    # "k":I
+    .end local v8    # "proc":Lcom/android/server/am/ProcessRecord;
+    :cond_8
+    add-int/lit8 v1, v1, 0x1
+
+    goto :goto_0
+
+    .end local v2    # "j":I
+    .end local v10    # "uids":Landroid/util/SparseArray;, "Landroid/util/SparseArray<Lcom/android/server/am/ProcessRecord;>;"
+    :cond_9
+    const/4 v1, 0x0
+
+    :goto_4
+    invoke-virtual {v9}, Ljava/util/ArrayList;->size()I
+
+    move-result v11
+
+    if-ge v1, v11, :cond_b
+
+    invoke-virtual {v9, v1}, Ljava/util/ArrayList;->get(I)Ljava/lang/Object;
+
+    move-result-object v7
+
+    check-cast v7, Lcom/android/server/am/ProcessRecord;
+
+    .local v7, "pr":Lcom/android/server/am/ProcessRecord;
+    iget v11, v7, Lcom/android/server/am/ProcessRecord;->setSchedGroup:I
+
+    if-nez v11, :cond_a
+
+    iget-object v11, v7, Lcom/android/server/am/ProcessRecord;->curReceivers:Landroid/util/ArraySet;
+
+    invoke-virtual {v11}, Landroid/util/ArraySet;->isEmpty()Z
+
+    move-result v11
+
+    if-eqz v11, :cond_a
+
+    const-string/jumbo v11, "remove task"
+
+    const/4 v12, 0x1
+
+    invoke-virtual {v7, v11, v12}, Lcom/android/server/am/ProcessRecord;->kill(Ljava/lang/String;Z)V
+
+    :goto_5
+    add-int/lit8 v1, v1, 0x1
+
+    goto :goto_4
+
+    :cond_a
+    const-string/jumbo v11, "remove task"
+
+    iput-object v11, v7, Lcom/android/server/am/ProcessRecord;->waitingToKill:Ljava/lang/String;
+
+    goto :goto_5
+
+    .end local v7    # "pr":Lcom/android/server/am/ProcessRecord;
+    :cond_b
+    return-void
+.end method
+
 .method private displayConfigMatchesGlobal(I)Z
     .locals 4
     .param p1, "displayId"    # I
@@ -6185,270 +6452,41 @@
 .end method
 
 .method cleanUpRemovedTaskLocked(Lcom/android/server/am/TaskRecord;ZZ)V
-    .locals 14
+    .locals 2
     .param p1, "tr"    # Lcom/android/server/am/TaskRecord;
     .param p2, "killProcess"    # Z
     .param p3, "removeFromRecents"    # Z
 
     .prologue
-    if-eqz p3, :cond_0
+    :try_start_0
+    invoke-direct {p0, p1, p2, p3}, Lcom/android/server/am/ActivityStackSupervisor;->cleanUpRemovedTaskLocked$Pr(Lcom/android/server/am/TaskRecord;ZZ)V
+    :try_end_0
+    .catchall {:try_start_0 .. :try_end_0} :catchall_0
 
-    iget-object v11, p0, Lcom/android/server/am/ActivityStackSupervisor;->mRecentTasks:Lcom/android/server/am/RecentTasks;
+    if-eqz p2, :cond_0
 
-    invoke-virtual {v11, p1}, Lcom/android/server/am/RecentTasks;->remove(Ljava/lang/Object;)Z
-
-    invoke-virtual {p1}, Lcom/android/server/am/TaskRecord;->removedFromRecents()V
-
-    :cond_0
     invoke-virtual {p1}, Lcom/android/server/am/TaskRecord;->getBaseIntent()Landroid/content/Intent;
-
-    move-result-object v11
-
-    invoke-virtual {v11}, Landroid/content/Intent;->getComponent()Landroid/content/ComponentName;
 
     move-result-object v0
 
-    .local v0, "component":Landroid/content/ComponentName;
-    if-nez v0, :cond_1
+    invoke-static {v0}, Lcom/android/server/am/PreventRunningUtils;->onCleanUpRemovedTask(Landroid/content/Intent;)V
 
-    sget-object v11, Lcom/android/server/am/ActivityStackSupervisor;->TAG:Ljava/lang/String;
-
-    new-instance v12, Ljava/lang/StringBuilder;
-
-    invoke-direct {v12}, Ljava/lang/StringBuilder;-><init>()V
-
-    const-string/jumbo v13, "No component for base intent of task: "
-
-    invoke-virtual {v12, v13}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v12
-
-    invoke-virtual {v12, p1}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
-
-    move-result-object v12
-
-    invoke-virtual {v12}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-
-    move-result-object v12
-
-    invoke-static {v11, v12}, Landroid/util/Slog;->w(Ljava/lang/String;Ljava/lang/String;)I
-
+    :cond_0
     return-void
 
-    :cond_1
-    iget-object v11, p0, Lcom/android/server/am/ActivityStackSupervisor;->mService:Lcom/android/server/am/ActivityManagerService;
+    :catchall_0
+    move-exception v0
 
-    iget-object v11, v11, Lcom/android/server/am/ActivityManagerService;->mServices:Lcom/android/server/am/ActiveServices;
-
-    new-instance v12, Landroid/content/Intent;
+    if-eqz p2, :cond_1
 
     invoke-virtual {p1}, Lcom/android/server/am/TaskRecord;->getBaseIntent()Landroid/content/Intent;
 
-    move-result-object v13
+    move-result-object v1
 
-    invoke-direct {v12, v13}, Landroid/content/Intent;-><init>(Landroid/content/Intent;)V
+    invoke-static {v1}, Lcom/android/server/am/PreventRunningUtils;->onCleanUpRemovedTask(Landroid/content/Intent;)V
 
-    invoke-virtual {v11, p1, v0, v12}, Lcom/android/server/am/ActiveServices;->cleanUpRemovedTaskLocked(Lcom/android/server/am/TaskRecord;Landroid/content/ComponentName;Landroid/content/Intent;)V
-
-    if-nez p2, :cond_2
-
-    return-void
-
-    :cond_2
-    invoke-virtual {v0}, Landroid/content/ComponentName;->getPackageName()Ljava/lang/String;
-
-    move-result-object v5
-
-    .local v5, "pkg":Ljava/lang/String;
-    new-instance v9, Ljava/util/ArrayList;
-
-    invoke-direct {v9}, Ljava/util/ArrayList;-><init>()V
-
-    .local v9, "procsToKill":Ljava/util/ArrayList;, "Ljava/util/ArrayList<Lcom/android/server/am/ProcessRecord;>;"
-    iget-object v11, p0, Lcom/android/server/am/ActivityStackSupervisor;->mService:Lcom/android/server/am/ActivityManagerService;
-
-    iget-object v11, v11, Lcom/android/server/am/ActivityManagerService;->mProcessNames:Lcom/android/internal/app/ProcessMap;
-
-    invoke-virtual {v11}, Lcom/android/internal/app/ProcessMap;->getMap()Landroid/util/ArrayMap;
-
-    move-result-object v6
-
-    .local v6, "pmap":Landroid/util/ArrayMap;, "Landroid/util/ArrayMap<Ljava/lang/String;Landroid/util/SparseArray<Lcom/android/server/am/ProcessRecord;>;>;"
-    const/4 v1, 0x0
-
-    .local v1, "i":I
-    :goto_0
-    invoke-virtual {v6}, Landroid/util/ArrayMap;->size()I
-
-    move-result v11
-
-    if-ge v1, v11, :cond_9
-
-    invoke-virtual {v6, v1}, Landroid/util/ArrayMap;->valueAt(I)Ljava/lang/Object;
-
-    move-result-object v10
-
-    check-cast v10, Landroid/util/SparseArray;
-
-    .local v10, "uids":Landroid/util/SparseArray;, "Landroid/util/SparseArray<Lcom/android/server/am/ProcessRecord;>;"
-    const/4 v2, 0x0
-
-    .local v2, "j":I
-    :goto_1
-    invoke-virtual {v10}, Landroid/util/SparseArray;->size()I
-
-    move-result v11
-
-    if-ge v2, v11, :cond_8
-
-    invoke-virtual {v10, v2}, Landroid/util/SparseArray;->valueAt(I)Ljava/lang/Object;
-
-    move-result-object v8
-
-    check-cast v8, Lcom/android/server/am/ProcessRecord;
-
-    .local v8, "proc":Lcom/android/server/am/ProcessRecord;
-    iget v11, v8, Lcom/android/server/am/ProcessRecord;->userId:I
-
-    iget v12, p1, Lcom/android/server/am/TaskRecord;->userId:I
-
-    if-eq v11, v12, :cond_4
-
-    :cond_3
-    :goto_2
-    add-int/lit8 v2, v2, 0x1
-
-    goto :goto_1
-
-    :cond_4
-    iget-object v11, p0, Lcom/android/server/am/ActivityStackSupervisor;->mService:Lcom/android/server/am/ActivityManagerService;
-
-    iget-object v11, v11, Lcom/android/server/am/ActivityManagerService;->mHomeProcess:Lcom/android/server/am/ProcessRecord;
-
-    if-eq v8, v11, :cond_3
-
-    iget-object v11, v8, Lcom/android/server/am/ProcessRecord;->pkgList:Landroid/util/ArrayMap;
-
-    invoke-virtual {v11, v5}, Landroid/util/ArrayMap;->containsKey(Ljava/lang/Object;)Z
-
-    move-result v11
-
-    if-eqz v11, :cond_3
-
-    const/4 v3, 0x0
-
-    .local v3, "k":I
-    :goto_3
-    iget-object v11, v8, Lcom/android/server/am/ProcessRecord;->activities:Ljava/util/ArrayList;
-
-    invoke-virtual {v11}, Ljava/util/ArrayList;->size()I
-
-    move-result v11
-
-    if-ge v3, v11, :cond_6
-
-    iget-object v11, v8, Lcom/android/server/am/ProcessRecord;->activities:Ljava/util/ArrayList;
-
-    invoke-virtual {v11, v3}, Ljava/util/ArrayList;->get(I)Ljava/lang/Object;
-
-    move-result-object v11
-
-    check-cast v11, Lcom/android/server/am/ActivityRecord;
-
-    invoke-virtual {v11}, Lcom/android/server/am/ActivityRecord;->getTask()Lcom/android/server/am/TaskRecord;
-
-    move-result-object v4
-
-    .local v4, "otherTask":Lcom/android/server/am/TaskRecord;
-    iget v11, p1, Lcom/android/server/am/TaskRecord;->taskId:I
-
-    iget v12, v4, Lcom/android/server/am/TaskRecord;->taskId:I
-
-    if-eq v11, v12, :cond_5
-
-    iget-boolean v11, v4, Lcom/android/server/am/TaskRecord;->inRecents:Z
-
-    if-eqz v11, :cond_5
-
-    return-void
-
-    :cond_5
-    add-int/lit8 v3, v3, 0x1
-
-    goto :goto_3
-
-    .end local v4    # "otherTask":Lcom/android/server/am/TaskRecord;
-    :cond_6
-    iget-boolean v11, v8, Lcom/android/server/am/ProcessRecord;->foregroundServices:Z
-
-    if-eqz v11, :cond_7
-
-    return-void
-
-    :cond_7
-    invoke-virtual {v9, v8}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
-
-    goto :goto_2
-
-    .end local v3    # "k":I
-    .end local v8    # "proc":Lcom/android/server/am/ProcessRecord;
-    :cond_8
-    add-int/lit8 v1, v1, 0x1
-
-    goto :goto_0
-
-    .end local v2    # "j":I
-    .end local v10    # "uids":Landroid/util/SparseArray;, "Landroid/util/SparseArray<Lcom/android/server/am/ProcessRecord;>;"
-    :cond_9
-    const/4 v1, 0x0
-
-    :goto_4
-    invoke-virtual {v9}, Ljava/util/ArrayList;->size()I
-
-    move-result v11
-
-    if-ge v1, v11, :cond_b
-
-    invoke-virtual {v9, v1}, Ljava/util/ArrayList;->get(I)Ljava/lang/Object;
-
-    move-result-object v7
-
-    check-cast v7, Lcom/android/server/am/ProcessRecord;
-
-    .local v7, "pr":Lcom/android/server/am/ProcessRecord;
-    iget v11, v7, Lcom/android/server/am/ProcessRecord;->setSchedGroup:I
-
-    if-nez v11, :cond_a
-
-    iget-object v11, v7, Lcom/android/server/am/ProcessRecord;->curReceivers:Landroid/util/ArraySet;
-
-    invoke-virtual {v11}, Landroid/util/ArraySet;->isEmpty()Z
-
-    move-result v11
-
-    if-eqz v11, :cond_a
-
-    const-string/jumbo v11, "remove task"
-
-    const/4 v12, 0x1
-
-    invoke-virtual {v7, v11, v12}, Lcom/android/server/am/ProcessRecord;->kill(Ljava/lang/String;Z)V
-
-    :goto_5
-    add-int/lit8 v1, v1, 0x1
-
-    goto :goto_4
-
-    :cond_a
-    const-string/jumbo v11, "remove task"
-
-    iput-object v11, v7, Lcom/android/server/am/ProcessRecord;->waitingToKill:Ljava/lang/String;
-
-    goto :goto_5
-
-    .end local v7    # "pr":Lcom/android/server/am/ProcessRecord;
-    :cond_b
-    return-void
+    :cond_1
+    throw v0
 .end method
 
 .method cleanupActivity(Lcom/android/server/am/ActivityRecord;)V
@@ -10999,7 +11037,7 @@
     return v2
 .end method
 
-.method synthetic lambda$-com_android_server_am_ActivityStackSupervisor_113947(IZ)V
+.method synthetic lambda$-com_android_server_am_ActivityStackSupervisor_114013(IZ)V
     .locals 0
     .param p1, "fromStackId"    # I
     .param p2, "onTop"    # Z
@@ -11010,7 +11048,7 @@
     return-void
 .end method
 
-.method synthetic lambda$-com_android_server_am_ActivityStackSupervisor_122545(I)V
+.method synthetic lambda$-com_android_server_am_ActivityStackSupervisor_122611(I)V
     .locals 0
     .param p1, "stackId"    # I
 
@@ -13391,6 +13429,12 @@
     move-result v20
 
     invoke-interface/range {v4 .. v21}, Landroid/app/IApplicationThread;->scheduleLaunchActivity(Landroid/content/Intent;Landroid/os/IBinder;ILandroid/content/pm/ActivityInfo;Landroid/content/res/Configuration;Landroid/content/res/Configuration;Landroid/content/res/CompatibilityInfo;Ljava/lang/String;Lcom/android/internal/app/IVoiceInteractor;ILandroid/os/Bundle;Landroid/os/PersistableBundle;Ljava/util/List;Ljava/util/List;ZZLandroid/app/ProfilerInfo;)V
+
+    move-object/from16 v0, p1
+
+    iget-object v4, v0, Lcom/android/server/am/ActivityRecord;->appToken:Landroid/view/IApplicationToken$Stub;
+
+    invoke-static {v4}, Lcom/android/server/am/PreventRunningUtils;->onLaunchActivity(Landroid/os/IBinder;)V
 
     move-object/from16 v0, p2
 

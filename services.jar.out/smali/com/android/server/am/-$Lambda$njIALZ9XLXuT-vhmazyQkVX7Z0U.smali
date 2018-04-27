@@ -33,7 +33,7 @@
     .param p1, "arg0"    # Lcom/android/internal/os/ProcessCpuTracker$Stats;
 
     .prologue
-    invoke-static {p1}, Lcom/android/server/am/ActivityManagerService;->lambda$-com_android_server_am_ActivityManagerService_768461(Lcom/android/internal/os/ProcessCpuTracker$Stats;)Z
+    invoke-static {p1}, Lcom/android/server/am/ActivityManagerService;->lambda$-com_android_server_am_ActivityManagerService_770506(Lcom/android/internal/os/ProcessCpuTracker$Stats;)Z
 
     move-result v0
 

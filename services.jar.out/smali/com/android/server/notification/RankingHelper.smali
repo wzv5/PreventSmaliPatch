@@ -3100,7 +3100,7 @@
     throw v4
 .end method
 
-.method getPackagePriority(Ljava/lang/String;I)I
+.method public getPackagePriority(Ljava/lang/String;I)I
     .locals 1
     .param p1, "pkg"    # Ljava/lang/String;
     .param p2, "uid"    # I

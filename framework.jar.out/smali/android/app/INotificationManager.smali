@@ -406,6 +406,14 @@
     .end annotation
 .end method
 
+.method public abstract getPriority(Ljava/lang/String;I)I
+    .annotation system Ldalvik/annotation/Throws;
+        value = {
+            Landroid/os/RemoteException;
+        }
+    .end annotation
+.end method
+
 .method public abstract getRuleInstanceCount(Landroid/content/ComponentName;)I
     .annotation system Ldalvik/annotation/Throws;
         value = {

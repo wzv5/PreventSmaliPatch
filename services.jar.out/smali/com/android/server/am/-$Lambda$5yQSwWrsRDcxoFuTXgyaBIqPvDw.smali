@@ -28,7 +28,7 @@
 
     iget-boolean v2, p0, Lcom/android/server/am/-$Lambda$5yQSwWrsRDcxoFuTXgyaBIqPvDw;->-$f0:Z
 
-    invoke-virtual {v0, v1, v2}, Lcom/android/server/am/ActivityStackSupervisor;->lambda$-com_android_server_am_ActivityStackSupervisor_113947(IZ)V
+    invoke-virtual {v0, v1, v2}, Lcom/android/server/am/ActivityStackSupervisor;->lambda$-com_android_server_am_ActivityStackSupervisor_114013(IZ)V
 
     return-void
 .end method

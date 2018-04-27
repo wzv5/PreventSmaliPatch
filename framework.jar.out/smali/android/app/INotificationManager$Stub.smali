@@ -116,6 +116,8 @@
 
 .field static final TRANSACTION_getPackageImportance:I = 0xc
 
+.field static final TRANSACTION_getPriority:I = 0x5a
+
 .field static final TRANSACTION_getRuleInstanceCount:I = 0x55
 
 .field static final TRANSACTION_getSnoozedNotificationsFromListener:I = 0x2b
@@ -4701,6 +4703,45 @@
     .restart local v17    # "_arg0":Z
     goto :goto_46
 
+    .end local v17    # "_arg0":Z
+    :sswitch_5a
+    const-string/jumbo v4, "android.app.INotificationManager"
+
+    move-object/from16 v0, p2
+
+    invoke-virtual {v0, v4}, Landroid/os/Parcel;->enforceInterface(Ljava/lang/String;)V
+
+    invoke-virtual/range {p2 .. p2}, Landroid/os/Parcel;->readString()Ljava/lang/String;
+
+    move-result-object v5
+
+    .restart local v5    # "_arg0":Ljava/lang/String;
+    invoke-virtual/range {p2 .. p2}, Landroid/os/Parcel;->readInt()I
+
+    move-result v19
+
+    .restart local v19    # "_arg1":I
+    move-object/from16 v0, p0
+
+    move/from16 v1, v19
+
+    invoke-virtual {v0, v5, v1}, Landroid/app/INotificationManager$Stub;->getPriority(Ljava/lang/String;I)I
+
+    move-result v41
+
+    .restart local v41    # "_result":I
+    invoke-virtual/range {p3 .. p3}, Landroid/os/Parcel;->writeNoException()V
+
+    move-object/from16 v0, p3
+
+    move/from16 v1, v41
+
+    invoke-virtual {v0, v1}, Landroid/os/Parcel;->writeInt(I)V
+
+    const/4 v4, 0x1
+
+    return v4
+
     :sswitch_data_0
     .sparse-switch
         0x1 -> :sswitch_1
@@ -4792,6 +4833,7 @@
         0x57 -> :sswitch_57
         0x58 -> :sswitch_58
         0x59 -> :sswitch_59
+        0x5a -> :sswitch_5a
         0x5f4e5446 -> :sswitch_0
     .end sparse-switch
 .end method

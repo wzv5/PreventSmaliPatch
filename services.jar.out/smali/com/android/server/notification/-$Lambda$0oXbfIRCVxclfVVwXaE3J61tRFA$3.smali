@@ -21,7 +21,7 @@
 
     iget v1, p0, Lcom/android/server/notification/-$Lambda$0oXbfIRCVxclfVVwXaE3J61tRFA$3;->-$f1:I
 
-    invoke-static {v0, v1, p1}, Lcom/android/server/notification/NotificationManagerService$16;->lambda$-com_android_server_notification_NotificationManagerService$16_216771(III)Z
+    invoke-static {v0, v1, p1}, Lcom/android/server/notification/NotificationManagerService$16;->lambda$-com_android_server_notification_NotificationManagerService$16_216953(III)Z
 
     move-result v0
 

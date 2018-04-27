@@ -22,7 +22,7 @@
 
     iget v1, p0, Lcom/android/server/am/-$Lambda$wXoCvN1vCS9Im-C0Hwk121gFGr0;->-$f0:I
 
-    invoke-virtual {v0, v1}, Lcom/android/server/am/ActivityStackSupervisor;->lambda$-com_android_server_am_ActivityStackSupervisor_122545(I)V
+    invoke-virtual {v0, v1}, Lcom/android/server/am/ActivityStackSupervisor;->lambda$-com_android_server_am_ActivityStackSupervisor_122611(I)V
 
     return-void
 .end method

@@ -20436,6 +20436,31 @@
 .end method
 
 .method private final handleAppDiedLocked(Lcom/android/server/am/ProcessRecord;ZZ)V
+    .locals 1
+    .param p1, "app"    # Lcom/android/server/am/ProcessRecord;
+    .param p2, "restarting"    # Z
+    .param p3, "allowRestart"    # Z
+
+    .prologue
+    invoke-direct {p0, p1, p2, p3}, Lcom/android/server/am/ActivityManagerService;->handleAppDiedLocked$Pr(Lcom/android/server/am/ProcessRecord;ZZ)V
+
+    if-nez p2, :cond_0
+
+    if-eqz p3, :cond_0
+
+    iget-boolean v0, p1, Lcom/android/server/am/ProcessRecord;->killedByAm:Z
+
+    xor-int/lit8 v0, v0, 0x1
+
+    if-eqz v0, :cond_0
+
+    invoke-static {p1}, Lcom/android/server/am/PreventRunningUtils;->onAppDied(Lcom/android/server/am/ProcessRecord;)V
+
+    :cond_0
+    return-void
+.end method
+
+.method private final handleAppDiedLocked$Pr(Lcom/android/server/am/ProcessRecord;ZZ)V
     .locals 10
     .param p1, "app"    # Lcom/android/server/am/ProcessRecord;
     .param p2, "restarting"    # Z
@@ -21896,6 +21921,11 @@
     move-result v11
 
     :goto_3
+    invoke-static {v11}, Lcom/android/server/am/PreventRunningUtils;->returnFalse(Z)Z
+
+    move-result v11
+
+    .local v11, "isDep":Z
     if-nez v11, :cond_6
 
     iget v13, v6, Lcom/android/server/am/ProcessRecord;->uid:I
@@ -21936,6 +21966,7 @@
 
     goto :goto_2
 
+    .end local v11    # "isDep":Z
     :cond_8
     const/4 v11, 0x0
 
@@ -22152,7 +22183,7 @@
     throw v6
 .end method
 
-.method static synthetic lambda$-com_android_server_am_ActivityManagerService_768461(Lcom/android/internal/os/ProcessCpuTracker$Stats;)Z
+.method static synthetic lambda$-com_android_server_am_ActivityManagerService_770506(Lcom/android/internal/os/ProcessCpuTracker$Stats;)Z
     .locals 4
     .param p0, "st"    # Lcom/android/internal/os/ProcessCpuTracker$Stats;
 
@@ -34151,6 +34182,57 @@
 .end method
 
 .method public bindService(Landroid/app/IApplicationThread;Landroid/os/IBinder;Landroid/content/Intent;Ljava/lang/String;Landroid/app/IServiceConnection;ILjava/lang/String;I)I
+    .locals 1
+    .param p1, "caller"    # Landroid/app/IApplicationThread;
+    .param p2, "token"    # Landroid/os/IBinder;
+    .param p3, "service"    # Landroid/content/Intent;
+    .param p4, "resolvedType"    # Ljava/lang/String;
+    .param p5, "connection"    # Landroid/app/IServiceConnection;
+    .param p6, "flags"    # I
+    .param p7, "callingPackage"    # Ljava/lang/String;
+    .param p8, "userId"    # I
+    .annotation system Ldalvik/annotation/Throws;
+        value = {
+            Landroid/os/TransactionTooLargeException;
+        }
+    .end annotation
+
+    .prologue
+    :try_start_0
+    invoke-static {p1}, Lcom/android/server/am/PreventRunningUtils;->setSender(Landroid/app/IApplicationThread;)V
+
+    invoke-static {p1, p2, p3}, Lcom/android/server/am/PreventRunningUtils;->hookBindService(Landroid/app/IApplicationThread;Landroid/os/IBinder;Landroid/content/Intent;)Z
+
+    move-result v0
+
+    if-eqz v0, :cond_0
+
+    invoke-virtual/range {p0 .. p8}, Lcom/android/server/am/ActivityManagerService;->bindService$Pr(Landroid/app/IApplicationThread;Landroid/os/IBinder;Landroid/content/Intent;Ljava/lang/String;Landroid/app/IServiceConnection;ILjava/lang/String;I)I
+    :try_end_0
+    .catchall {:try_start_0 .. :try_end_0} :catchall_0
+
+    move-result v0
+
+    invoke-static {}, Lcom/android/server/am/PreventRunningUtils;->clearSender()V
+
+    return v0
+
+    :cond_0
+    const/4 v0, 0x0
+
+    invoke-static {}, Lcom/android/server/am/PreventRunningUtils;->clearSender()V
+
+    return v0
+
+    :catchall_0
+    move-exception v0
+
+    invoke-static {}, Lcom/android/server/am/PreventRunningUtils;->clearSender()V
+
+    throw v0
+.end method
+
+.method public bindService$Pr(Landroid/app/IApplicationThread;Landroid/os/IBinder;Landroid/content/Intent;Ljava/lang/String;Landroid/app/IServiceConnection;ILjava/lang/String;I)I
     .locals 9
     .param p1, "caller"    # Landroid/app/IApplicationThread;
     .param p2, "token"    # Landroid/os/IBinder;
@@ -34293,6 +34375,51 @@
 .end method
 
 .method public final broadcastIntent(Landroid/app/IApplicationThread;Landroid/content/Intent;Ljava/lang/String;Landroid/content/IIntentReceiver;ILjava/lang/String;Landroid/os/Bundle;[Ljava/lang/String;ILandroid/os/Bundle;ZZI)I
+    .locals 2
+    .param p1, "caller"    # Landroid/app/IApplicationThread;
+    .param p2, "intent"    # Landroid/content/Intent;
+    .param p3, "resolvedType"    # Ljava/lang/String;
+    .param p4, "resultTo"    # Landroid/content/IIntentReceiver;
+    .param p5, "resultCode"    # I
+    .param p6, "resultData"    # Ljava/lang/String;
+    .param p7, "resultExtras"    # Landroid/os/Bundle;
+    .param p8, "requiredPermissions"    # [Ljava/lang/String;
+    .param p9, "appOp"    # I
+    .param p10, "bOptions"    # Landroid/os/Bundle;
+    .param p11, "serialized"    # Z
+    .param p12, "sticky"    # Z
+    .param p13, "userId"    # I
+
+    .prologue
+    :try_start_0
+    invoke-static {p1}, Lcom/android/server/am/PreventRunningUtils;->setSender(Landroid/app/IApplicationThread;)V
+
+    invoke-virtual/range {p0 .. p13}, Lcom/android/server/am/ActivityManagerService;->broadcastIntent$Pr(Landroid/app/IApplicationThread;Landroid/content/Intent;Ljava/lang/String;Landroid/content/IIntentReceiver;ILjava/lang/String;Landroid/os/Bundle;[Ljava/lang/String;ILandroid/os/Bundle;ZZI)I
+
+    move-result v0
+
+    .local v0, "res":I
+    if-nez v0, :cond_0
+
+    invoke-static {p2}, Lcom/android/server/am/PreventRunningUtils;->onBroadcastIntent(Landroid/content/Intent;)V
+    :try_end_0
+    .catchall {:try_start_0 .. :try_end_0} :catchall_0
+
+    :cond_0
+    invoke-static {}, Lcom/android/server/am/PreventRunningUtils;->clearSender()V
+
+    return v0
+
+    .end local v0    # "res":I
+    :catchall_0
+    move-exception v1
+
+    invoke-static {}, Lcom/android/server/am/PreventRunningUtils;->clearSender()V
+
+    throw v1
+.end method
+
+.method public final broadcastIntent$Pr(Landroid/app/IApplicationThread;Landroid/content/Intent;Ljava/lang/String;Landroid/content/IIntentReceiver;ILjava/lang/String;Landroid/os/Bundle;[Ljava/lang/String;ILandroid/os/Bundle;ZZI)I
     .locals 22
     .param p1, "caller"    # Landroid/app/IApplicationThread;
     .param p2, "intent"    # Landroid/content/Intent;
@@ -72958,7 +73085,7 @@
     throw v0
 .end method
 
-.method synthetic lambda$-com_android_server_am_ActivityManagerService_351999(Lcom/android/server/am/ActivityRecord;Landroid/app/PictureInPictureParams;)V
+.method synthetic lambda$-com_android_server_am_ActivityManagerService_353758(Lcom/android/server/am/ActivityRecord;Landroid/app/PictureInPictureParams;)V
     .locals 8
     .param p1, "r"    # Lcom/android/server/am/ActivityRecord;
     .param p2, "params"    # Landroid/app/PictureInPictureParams;
@@ -73660,6 +73787,30 @@
 .end method
 
 .method public moveActivityTaskToBack(Landroid/os/IBinder;Z)Z
+    .locals 1
+    .param p1, "token"    # Landroid/os/IBinder;
+    .param p2, "nonRoot"    # Z
+
+    .prologue
+    invoke-virtual {p0, p1, p2}, Lcom/android/server/am/ActivityManagerService;->moveActivityTaskToBack$Pr(Landroid/os/IBinder;Z)Z
+
+    move-result v0
+
+    if-eqz v0, :cond_0
+
+    invoke-static {p1}, Lcom/android/server/am/PreventRunningUtils;->onMoveActivityTaskToBack(Landroid/os/IBinder;)V
+
+    const/4 v0, 0x1
+
+    return v0
+
+    :cond_0
+    const/4 v0, 0x0
+
+    return v0
+.end method
+
+.method public moveActivityTaskToBack$Pr(Landroid/os/IBinder;Z)Z
     .locals 5
     .param p1, "token"    # Landroid/os/IBinder;
     .param p2, "nonRoot"    # Z
@@ -89806,6 +89957,31 @@
 .end method
 
 .method public final startActivity(Landroid/app/IApplicationThread;Ljava/lang/String;Landroid/content/Intent;Ljava/lang/String;Landroid/os/IBinder;Ljava/lang/String;IILandroid/app/ProfilerInfo;Landroid/os/Bundle;)I
+    .locals 1
+    .param p1, "caller"    # Landroid/app/IApplicationThread;
+    .param p2, "callingPackage"    # Ljava/lang/String;
+    .param p3, "intent"    # Landroid/content/Intent;
+    .param p4, "resolvedType"    # Ljava/lang/String;
+    .param p5, "resultTo"    # Landroid/os/IBinder;
+    .param p6, "resultWho"    # Ljava/lang/String;
+    .param p7, "requestCode"    # I
+    .param p8, "startFlags"    # I
+    .param p9, "profilerInfo"    # Landroid/app/ProfilerInfo;
+    .param p10, "bOptions"    # Landroid/os/Bundle;
+
+    .prologue
+    invoke-virtual/range {p0 .. p10}, Lcom/android/server/am/ActivityManagerService;->startActivity$Pr(Landroid/app/IApplicationThread;Ljava/lang/String;Landroid/content/Intent;Ljava/lang/String;Landroid/os/IBinder;Ljava/lang/String;IILandroid/app/ProfilerInfo;Landroid/os/Bundle;)I
+
+    move-result v0
+
+    invoke-static {v0, p1, p2, p3}, Lcom/android/server/am/PreventRunningUtils;->onStartActivity(ILandroid/app/IApplicationThread;Ljava/lang/String;Landroid/content/Intent;)I
+
+    move-result v0
+
+    return v0
+.end method
+
+.method public final startActivity$Pr(Landroid/app/IApplicationThread;Ljava/lang/String;Landroid/content/Intent;Ljava/lang/String;Landroid/os/IBinder;Ljava/lang/String;IILandroid/app/ProfilerInfo;Landroid/os/Bundle;)I
     .locals 12
     .param p1, "caller"    # Landroid/app/IApplicationThread;
     .param p2, "callingPackage"    # Ljava/lang/String;
@@ -93234,6 +93410,92 @@
 .end method
 
 .method final startProcessLocked(Ljava/lang/String;Landroid/content/pm/ApplicationInfo;ZILjava/lang/String;Landroid/content/ComponentName;ZZIZLjava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/Runnable;)Lcom/android/server/am/ProcessRecord;
+    .locals 1
+    .param p1, "processName"    # Ljava/lang/String;
+    .param p2, "info"    # Landroid/content/pm/ApplicationInfo;
+    .param p3, "knownToBeDead"    # Z
+    .param p4, "intentFlags"    # I
+    .param p5, "hostingType"    # Ljava/lang/String;
+    .param p6, "hostingName"    # Landroid/content/ComponentName;
+    .param p7, "allowWhileBooting"    # Z
+    .param p8, "isolated"    # Z
+    .param p9, "isolatedUid"    # I
+    .param p10, "keepIfLarge"    # Z
+    .param p11, "abiOverride"    # Ljava/lang/String;
+    .param p12, "entryPoint"    # Ljava/lang/String;
+    .param p13, "entryPointArgs"    # [Ljava/lang/String;
+    .param p14, "crashHandler"    # Ljava/lang/Runnable;
+
+    .prologue
+    invoke-static/range {p1 .. p6}, Lcom/android/server/am/PreventRunningUtils;->hookStartProcessLocked(Ljava/lang/String;Landroid/content/pm/ApplicationInfo;ZILjava/lang/String;Landroid/content/ComponentName;)Z
+
+    move-result v0
+
+    if-eqz v0, :cond_0
+
+    invoke-virtual/range {p0 .. p14}, Lcom/android/server/am/ActivityManagerService;->startProcessLocked$Pr(Ljava/lang/String;Landroid/content/pm/ApplicationInfo;ZILjava/lang/String;Landroid/content/ComponentName;ZZIZLjava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/Runnable;)Lcom/android/server/am/ProcessRecord;
+
+    move-result-object v0
+
+    return-object v0
+
+    :cond_0
+    const/4 v0, 0x0
+
+    return-object v0
+.end method
+
+.method final startProcessLocked(Ljava/lang/String;Landroid/content/pm/ApplicationInfo;ZILjava/lang/String;Landroid/content/ComponentName;ZZZ)Lcom/android/server/am/ProcessRecord;
+    .locals 15
+    .param p1, "processName"    # Ljava/lang/String;
+    .param p2, "info"    # Landroid/content/pm/ApplicationInfo;
+    .param p3, "knownToBeDead"    # Z
+    .param p4, "intentFlags"    # I
+    .param p5, "hostingType"    # Ljava/lang/String;
+    .param p6, "hostingName"    # Landroid/content/ComponentName;
+    .param p7, "allowWhileBooting"    # Z
+    .param p8, "isolated"    # Z
+    .param p9, "keepIfLarge"    # Z
+
+    .prologue
+    const/4 v9, 0x0
+
+    const/4 v11, 0x0
+
+    const/4 v12, 0x0
+
+    const/4 v13, 0x0
+
+    const/4 v14, 0x0
+
+    move-object v0, p0
+
+    move-object/from16 v1, p1
+
+    move-object/from16 v2, p2
+
+    move/from16 v3, p3
+
+    move/from16 v4, p4
+
+    move-object/from16 v5, p5
+
+    move-object/from16 v6, p6
+
+    move/from16 v7, p7
+
+    move/from16 v8, p8
+
+    move/from16 v10, p9
+
+    invoke-virtual/range {v0 .. v14}, Lcom/android/server/am/ActivityManagerService;->startProcessLocked(Ljava/lang/String;Landroid/content/pm/ApplicationInfo;ZILjava/lang/String;Landroid/content/ComponentName;ZZIZLjava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/Runnable;)Lcom/android/server/am/ProcessRecord;
+
+    move-result-object v0
+
+    return-object v0
+.end method
+
+.method final startProcessLocked$Pr(Ljava/lang/String;Landroid/content/pm/ApplicationInfo;ZILjava/lang/String;Landroid/content/ComponentName;ZZIZLjava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/Runnable;)Lcom/android/server/am/ProcessRecord;
     .locals 12
     .param p1, "processName"    # Ljava/lang/String;
     .param p2, "info"    # Landroid/content/pm/ApplicationInfo;
@@ -93592,56 +93854,6 @@
     goto :goto_3
 .end method
 
-.method final startProcessLocked(Ljava/lang/String;Landroid/content/pm/ApplicationInfo;ZILjava/lang/String;Landroid/content/ComponentName;ZZZ)Lcom/android/server/am/ProcessRecord;
-    .locals 15
-    .param p1, "processName"    # Ljava/lang/String;
-    .param p2, "info"    # Landroid/content/pm/ApplicationInfo;
-    .param p3, "knownToBeDead"    # Z
-    .param p4, "intentFlags"    # I
-    .param p5, "hostingType"    # Ljava/lang/String;
-    .param p6, "hostingName"    # Landroid/content/ComponentName;
-    .param p7, "allowWhileBooting"    # Z
-    .param p8, "isolated"    # Z
-    .param p9, "keepIfLarge"    # Z
-
-    .prologue
-    const/4 v9, 0x0
-
-    const/4 v11, 0x0
-
-    const/4 v12, 0x0
-
-    const/4 v13, 0x0
-
-    const/4 v14, 0x0
-
-    move-object v0, p0
-
-    move-object/from16 v1, p1
-
-    move-object/from16 v2, p2
-
-    move/from16 v3, p3
-
-    move/from16 v4, p4
-
-    move-object/from16 v5, p5
-
-    move-object/from16 v6, p6
-
-    move/from16 v7, p7
-
-    move/from16 v8, p8
-
-    move/from16 v10, p9
-
-    invoke-virtual/range {v0 .. v14}, Lcom/android/server/am/ActivityManagerService;->startProcessLocked(Ljava/lang/String;Landroid/content/pm/ApplicationInfo;ZILjava/lang/String;Landroid/content/ComponentName;ZZIZLjava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/Runnable;)Lcom/android/server/am/ProcessRecord;
-
-    move-result-object v0
-
-    return-object v0
-.end method
-
 .method startRunningVoiceLocked(Landroid/service/voice/IVoiceInteractionSession;I)V
     .locals 3
     .param p1, "session"    # Landroid/service/voice/IVoiceInteractionSession;
@@ -93709,6 +93921,55 @@
 .end method
 
 .method public startService(Landroid/app/IApplicationThread;Landroid/content/Intent;Ljava/lang/String;ZLjava/lang/String;I)Landroid/content/ComponentName;
+    .locals 1
+    .param p1, "caller"    # Landroid/app/IApplicationThread;
+    .param p2, "service"    # Landroid/content/Intent;
+    .param p3, "resolvedType"    # Ljava/lang/String;
+    .param p4, "requireForeground"    # Z
+    .param p5, "callingPackage"    # Ljava/lang/String;
+    .param p6, "userId"    # I
+    .annotation system Ldalvik/annotation/Throws;
+        value = {
+            Landroid/os/TransactionTooLargeException;
+        }
+    .end annotation
+
+    .prologue
+    :try_start_0
+    invoke-static {p1}, Lcom/android/server/am/PreventRunningUtils;->setSender(Landroid/app/IApplicationThread;)V
+
+    invoke-static {p1, p2}, Lcom/android/server/am/PreventRunningUtils;->hookStartService(Landroid/app/IApplicationThread;Landroid/content/Intent;)Z
+
+    move-result v0
+
+    if-eqz v0, :cond_0
+
+    invoke-virtual/range {p0 .. p6}, Lcom/android/server/am/ActivityManagerService;->startService$Pr(Landroid/app/IApplicationThread;Landroid/content/Intent;Ljava/lang/String;ZLjava/lang/String;I)Landroid/content/ComponentName;
+    :try_end_0
+    .catchall {:try_start_0 .. :try_end_0} :catchall_0
+
+    move-result-object v0
+
+    invoke-static {}, Lcom/android/server/am/PreventRunningUtils;->clearSender()V
+
+    return-object v0
+
+    :cond_0
+    const/4 v0, 0x0
+
+    invoke-static {}, Lcom/android/server/am/PreventRunningUtils;->clearSender()V
+
+    return-object v0
+
+    :catchall_0
+    move-exception v0
+
+    invoke-static {}, Lcom/android/server/am/PreventRunningUtils;->clearSender()V
+
+    throw v0
+.end method
+
+.method public startService$Pr(Landroid/app/IApplicationThread;Landroid/content/Intent;Ljava/lang/String;ZLjava/lang/String;I)Landroid/content/ComponentName;
     .locals 12
     .param p1, "caller"    # Landroid/app/IApplicationThread;
     .param p2, "service"    # Landroid/content/Intent;

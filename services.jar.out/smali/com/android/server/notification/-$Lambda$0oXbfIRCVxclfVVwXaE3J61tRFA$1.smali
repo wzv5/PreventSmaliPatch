@@ -30,7 +30,7 @@
 
     check-cast v2, Landroid/os/VibrationEffect;
 
-    invoke-virtual {v0, v1, v2}, Lcom/android/server/notification/NotificationManagerService;->lambda$-com_android_server_notification_NotificationManagerService_190836(Lcom/android/server/notification/NotificationRecord;Landroid/os/VibrationEffect;)V
+    invoke-virtual {v0, v1, v2}, Lcom/android/server/notification/NotificationManagerService;->lambda$-com_android_server_notification_NotificationManagerService_191018(Lcom/android/server/notification/NotificationRecord;Landroid/os/VibrationEffect;)V
 
     return-void
 .end method

@@ -6560,6 +6560,12 @@
     move-object/from16 v0, v31
 
     invoke-interface {v3, v5, v6, v7, v0}, Landroid/app/IApplicationThread;->scheduleResumeActivity(Landroid/os/IBinder;IZLandroid/os/Bundle;)V
+
+    move-object/from16 v0, v24
+
+    iget-object v3, v0, Lcom/android/server/am/ActivityRecord;->appToken:Landroid/view/IApplicationToken$Stub;
+
+    invoke-static {v3}, Lcom/android/server/am/PreventRunningUtils;->onResumeActivity(Landroid/os/IBinder;)V
     :try_end_3
     .catch Ljava/lang/Exception; {:try_start_3 .. :try_end_3} :catch_1
     .catchall {:try_start_3 .. :try_end_3} :catchall_0
@@ -8715,6 +8721,10 @@
     iget v8, p1, Lcom/android/server/am/ActivityRecord;->configChangeFlags:I
 
     invoke-interface {v5, v6, v7, v8}, Landroid/app/IApplicationThread;->scheduleDestroyActivity(Landroid/os/IBinder;ZI)V
+
+    iget-object v5, p1, Lcom/android/server/am/ActivityRecord;->appToken:Landroid/view/IApplicationToken$Stub;
+
+    invoke-static {v5}, Lcom/android/server/am/PreventRunningUtils;->onDestroyActivity(Landroid/os/IBinder;)V
     :try_end_0
     .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
 
@@ -18159,6 +18169,12 @@
     move v5, p4
 
     invoke-interface/range {v0 .. v5}, Landroid/app/IApplicationThread;->schedulePauseActivity(Landroid/os/IBinder;ZZIZ)V
+
+    iget-object v0, v8, Lcom/android/server/am/ActivityRecord;->appToken:Landroid/view/IApplicationToken$Stub;
+
+    iget-boolean v1, v8, Lcom/android/server/am/ActivityRecord;->finishing:Z
+
+    invoke-static {v0, v1, p1}, Lcom/android/server/am/PreventRunningUtils;->onUserLeavingActivity(Landroid/os/IBinder;ZZ)V
     :try_end_0
     .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
 
